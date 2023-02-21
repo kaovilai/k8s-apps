@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: test-dep
+  annotations: {}
+spec:
+  selector:
+    matchLabels:
+      app: name
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: name
+    spec:
+      securityContext:
+        runAsNonRoot: true
+      volumes:
+        - name: emptydir
+          emptyDir: {}
+      containers:
+        - name: container
+          securityContext:
+            seccompProfile:
+              type: RuntimeDefault
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+          image: >-
+            image-registry.openshift-image-registry.svc:5000/openshift/httpd:latest
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+          env: []
+          volumeMounts:
+            - mountPath: /emptydir
+              name: emptydir
+          # Create a file in the emptyDir volume containing current time in the file name and file content
+          command:
+            - "sh"
+            - "-c"
+            - "echo $(date +%s) > /emptydir/$(date +%s).txt && ls /emptydir && sh"
+          tty: true
+      imagePullSecrets: []
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+  paused: false
