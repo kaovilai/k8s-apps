@@ -1,4 +1,7 @@
 ---
+# Assumptions:
+# The only default storageclass is CSI
+
 # Restart test quickly with:
 # oc delete ns minimal-8csivol && oc create -f ./tests/e2e/sample-applications/minimal-8csivol/list.yaml && oc wait --for condition=available deployment/minimal-8csivol --timeout -1h && oc logs deploy/minimal-8csivol -f;
 
